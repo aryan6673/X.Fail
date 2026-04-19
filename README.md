@@ -1,12 +1,15 @@
 # xFail — Model Autopsy Benchmark
 
-A curated evaluation harness that surfaces qualitative failure modes in LLM coding tasks — not just pass rates.
+A focused evaluation harness built to expose the real failure modes of LLM code reasoning. This isn’t a pass/fail scoreboard; it’s a diagnostic layer for models that are pretending to understand requirements.
 
 ## Why xFail?
 
-Existing benchmarks (HumanEval, MBPP, SWE-Bench) tell you *how often* a model succeeds. xFail tells you *why* it fails — in reproducible, taxonomized patterns.
+Benchmarks like HumanEval, MBPP, and SWE-Bench measure surface accuracy. xFail is designed to classify failure behavior and tie it to concrete model breakdowns.
 
-**Use case:** Human Data teams designing training data based on specific, observed failure modes.
+Target audience:
+- Human Data teams refining training sets
+- Evaluation engineers exploring model weaknesses
+- Researchers building more resilient code assistance
 
 ## Quick Start
 
@@ -15,36 +18,46 @@ Existing benchmarks (HumanEval, MBPP, SWE-Bench) tell you *how often* a model su
 ```bash
 pip install -e .
 cp .env.example .env
-# Add your API keys to .env
+# Add API keys to .env
 ```
 
-### Run Benchmark
+### Run the benchmark
 
 ```bash
-# Run proof-of-concept tasks against default models (grok, gemini)
 xfail run --task-set poc
+```
 
-# Run against a specific model
+Run a specific model:
+
+```bash
 xfail run --models grok --task-set poc
+```
 
-# Run a single task
+Run a single task:
+
+```bash
 xfail run --task xfail/tasks/poc/deceptive_001.yaml
 ```
 
-### Generate Report
+### Generate a report
 
 ```bash
-# After running, generate an HTML report
 xfail report --run-id <TIMESTAMP> --format html
+```
 
-# Generate markdown instead
+Markdown output:
+
+```bash
 xfail report --run-id <TIMESTAMP> --format markdown
+```
 
-# Both
+Both:
+
+```bash
 xfail report --run-id <TIMESTAMP> --format both
 ```
 
-### Compare Models
+### Compare models
 
 ```bash
 xfail diff --model-a grok --model-b gemini --run <TIMESTAMP>
@@ -52,37 +65,37 @@ xfail diff --model-a grok --model-b gemini --run <TIMESTAMP>
 
 ## Failure Mode Taxonomy
 
-Every model output is tagged with one or more of these codes:
+Every result is tagged with one or more failure codes.
 
 | Code | Name | Description |
 |------|------|-------------|
-| `SPEC-MIS` | Specification misread | Implements plausible but wrong interpretation |
-| `INV-LOSS` | Invariant loss | Fails to maintain 2+ interacting constraints |
-| `EDGE-OBO` | Edge case / off-by-one | Passes happy path, fails boundaries |
-| `HALL-CON` | Hallucinated constraint | Invents a requirement not in the spec |
-| `ABS-FAIL` | Poor abstraction | Solves specific case, doesn't generalize |
-| `BIZ-FRAME` | Business framing gap | Fails when requirements are outcomes, not specs |
-| `CTX-DROP` | Context drop | Loses constraints in multi-turn sessions |
+| `SPEC-MIS` | Specification misread | Model implements a plausible but incorrect interpretation |
+| `INV-LOSS` | Invariant loss | Model violates interacting constraints or invariants |
+| `EDGE-OBO` | Edge case / off-by-one | Model handles the happy path but fails boundaries |
+| `HALL-CON` | Hallucinated constraint | Model invents requirements that are not present |
+| `ABS-FAIL` | Poor abstraction | Model overfits a specific case instead of generalizing |
+| `BIZ-FRAME` | Business framing gap | Model fails when intent is expressed as an outcome rather than a spec |
+| `CTX-DROP` | Context drop | Model loses constraints during multi-turn interactions |
 
 ## Project Structure
 
 ```
 xfail/
-├── models/          # API clients (Grok, Gemini)
-├── harness/         # Task execution, scoring, classification
-├── reports/         # Report generation
-├── tasks/           # Task definitions
-│   └── poc/         # Proof-of-concept tasks
-├── cli.py           # Command-line interface
+├── models/          # API clients for Grok and Gemini
+├── harness/         # task execution, scoring, and classification
+├── reports/         # report generation logic
+├── tasks/           # task definitions
+│   └── poc/         # proof-of-concept tasks
+├── cli.py           # command-line entrypoint
 └── __init__.py
 
-results/            # Execution logs (auto-generated)
-reports/            # Generated reports (auto-generated)
+results/            # generated execution logs
+reports/            # generated report artifacts
 ```
 
 ## Task Format
 
-Tasks are defined in YAML:
+Tasks are defined in YAML.
 
 ```yaml
 task_id: my_task
@@ -96,7 +109,6 @@ prompt: |
 
 reference_solution: |
   def solution():
-      # Reference implementation
       pass
 
 test_cases:
@@ -105,14 +117,14 @@ test_cases:
     name: "basic_test"
 
 scoring:
-  auto_tests: 60          # % weight
-  contradiction_flag: 25  # % weight
-  reasoning_quality: 15   # % weight (human-scored 0–3)
+  auto_tests: 60
+  contradiction_flag: 25
+  reasoning_quality: 15
 ```
 
 ## Generating Task Variants
 
-Use the adversarial generator to create deliberately tricky variants:
+Use the adversarial generator to create tricky variants from a base task.
 
 ```python
 from xfail.harness.adversary import AdversaryGenerator
@@ -120,8 +132,6 @@ from xfail.harness.task import load_task
 
 generator = AdversaryGenerator()
 base_task = load_task("tasks/poc/deceptive_001.yaml")
-
-# Create a deceptive variant
 variant = generator.generate_deceptive_variant(base_task, variant_num=1)
 ```
 
@@ -129,27 +139,27 @@ variant = generator.generate_deceptive_variant(base_task, variant_num=1)
 
 Reports include:
 
-1. **Executive summary** — top findings
-2. **Model comparison** — pass rates and failure codes by model
-3. **Failure mode analysis** — heatmap of codes × models
-4. **Task results** — detailed logs with classifier output
-5. **Taxonomy definitions** — reference for all 7 failure codes
+1. Executive summary with core findings
+2. Model comparison with pass rates and failure codes
+3. Failure mode analysis showing code frequency per model
+4. Task-level details with classifier output
+5. Taxonomy definitions for all failure categories
 
-Available in HTML and Markdown formats.
+Supported output formats: HTML and Markdown.
 
 ## Development
 
-### Installing in Development Mode
+### Install in development mode
 
 ```bash
 pip install -e .
 ```
 
-### Running Tests
+### Running tests
 
 ```bash
-# Currently uses real API calls—no mock testing
-# See phase 6 in implementation plan
+# Tests currently use real API calls.
+# Mocking is not yet implemented.
 ```
 
 ## API Keys
@@ -159,39 +169,39 @@ Required environment variables:
 - `XAI_API_KEY` — xAI Grok API key
 - `GEMINI_API_KEY` — Google Gemini API key
 
-Copy `.env.example` to `.env` and fill in your keys.
+Copy `.env.example` to `.env` and fill in the keys.
 
 ## Design Notes
 
-### Auto-Classification
+### Auto-classification
 
-Failure modes are classified using an LLM (Grok itself) that reads the prompt and output, then assigns one or more taxonomy codes. Human review is recommended for low-confidence predictions.
+Failure mode classification is performed by an LLM analyzing prompt, output, and expected behavior, then assigning taxonomy codes. Low-confidence predictions should be validated manually.
 
-### Task Execution
+### Task execution
 
-- Uses simple `exec()` to run submitted code against test cases
-- Captures all output, errors, and metadata
-- No sandboxing yet (use with trusted inputs only in production)
+The runner executes submitted code against test cases using `exec()`, captures output, errors, and metadata, and records the execution trace. There is no sandboxing yet; use only trusted inputs in production.
 
-### Multi-Turn Tasks
+### Multi-turn tasks
 
-Each turn includes full conversation history + prior outputs. Constraints can be introduced in later turns to test context retention.
+Each turn includes full conversation state and prior outputs. This makes it possible to test whether the model retains constraints across interactions.
 
 ## Limitations & Future Work
 
-- ❌ No code sandboxing (assumes trusted test environment)
-- ❌ No async execution (runs sequentially)
-- ❌ Limited to Python code (LLM flexibility may handle other languages)
-- 🔜 Extend to other languages with language-specific test runners
-- 🔜 Add custom scoring functions per task
-- 🔜 Support for fine-grained prompt engineering (different system prompts per model)
+- No code sandboxing yet
+- Execution is sequential, not asynchronous
+- Currently focused on Python tasks
+- Future work: language-specific runners for additional languages
+- Future work: richer scoring functions per task
+- Future work: finer-grained prompt control per model
 
 ## Contributing
 
-Follow the code style in [.github/copilot-instructions.md](.github/copilot-instructions.md):
-- Atomic commits (one thing per commit)
-- Human-readable code, minimal comments
-- No auto-generated documentation
+Follow the repo’s code style and commit habits:
+
+- small, focused commits
+- readable code
+- minimal comments
+- no generated documentation
 
 ## License
 
