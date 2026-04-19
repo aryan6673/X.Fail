@@ -209,4 +209,4 @@ Follow the repo’s code style and commit habits:
 
 ## License
 
-TBD
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
