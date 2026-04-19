@@ -1,0 +1,48 @@
+task_id: sysdesign_001
+category: sysdesign
+description: Implement rate limiter with adversarial edge cases
+difficulty: hard
+
+prompt: |
+  Implement a token bucket rate limiter that allows N requests per second.
+  
+  Requirements:
+  - Allow exactly N tokens to be consumed per second
+  - Handle burst requests gracefully
+  - Must remain fair when requests arrive in exact patterns (e.g., all at once)
+  - Maximum burst size: 2N tokens
+  
+  This must handle an adversarial scenario: a request arrives every 10ms for 1 second,
+  then all requests pause for 1 second. The limiter should NOT accumulate unbounded tokens
+  during the pause.
+
+reference_solution: |
+  import time
+  
+  class TokenBucket:
+      def __init__(self, rate, capacity):
+          self.rate = rate
+          self.capacity = capacity
+          self.tokens = capacity
+          self.last_update = time.time()
+      
+      def allow(self):
+          now = time.time()
+          elapsed = now - self.last_update
+          self.tokens = min(self.capacity, self.tokens + elapsed * self.rate)
+          self.last_update = now
+          
+          if self.tokens >= 1:
+              self.tokens -= 1
+              return True
+          return False
+
+test_cases:
+  - input: "[]"
+    expected_output: "True"
+    name: "initialization"
+
+scoring:
+  auto_tests: 60
+  contradiction_flag: 25
+  reasoning_quality: 15
