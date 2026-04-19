@@ -33,10 +33,10 @@ try:
     test_task.validate()
     print(f"   ✓ Task validation passed")
     
-    print("\n✅ All core components working!")
+    print("\n All core components working!")
     
 except Exception as e:
-    print(f"\n❌ Error: {e}")
+    print(f"\n Error: {e}")
     import traceback
     traceback.print_exc()
     sys.exit(1)
