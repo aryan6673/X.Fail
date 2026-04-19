@@ -1,9 +1,10 @@
-![version](https://img.shields.io/badge/version-v0.0.2-orange)
 # xFail — Model Autopsy Benchmark
 
 ![xFail banner](assets/X.Fail.png)
 
 A focused evaluation harness built to expose the real failure modes of LLM code reasoning. This isn’t a pass/fail scoreboard; it’s a diagnostic layer for models that are pretending to understand requirements.
+
+![version](https://img.shields.io/badge/version-v0.0.5-orange)
 
 ## Why xFail?
 
