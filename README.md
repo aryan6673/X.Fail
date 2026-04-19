@@ -3,7 +3,9 @@
 ![xFail banner](assets/X.Fail.png)
 
 A focused evaluation harness built to expose the real failure modes of LLM code reasoning. This isn’t a pass/fail scoreboard; it’s a diagnostic layer for models that are pretending to understand requirements.
+
 ![version](https://img.shields.io/badge/version-v0.0.4-orange)
+
 ## Why xFail?
 
 Benchmarks like HumanEval, MBPP, and SWE-Bench measure surface accuracy. xFail is designed to classify failure behavior and tie it to concrete model breakdowns.
