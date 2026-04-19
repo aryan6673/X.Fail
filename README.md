@@ -1,4 +1,4 @@
-![version](https://img.shields.io/badge/version-v0.0.2-orange)
+![version](https://img.shields.io/badge/version-v0.0.3-orange)
 # xFail — Model Autopsy Benchmark
 
 ![xFail banner](assets/X.Fail.png)
